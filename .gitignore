@@ -1,0 +1,12 @@
+/target
+/dist
+/git
+/llvm-mingw
+/bin/*.exe
+*.exe
+*.zip
+*.7z
+test_assets/
+settings.json
+.DS_Store
+Thumbs.db

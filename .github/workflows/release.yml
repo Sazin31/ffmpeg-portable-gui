@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-release:
+    name: Build & Package Windows Release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Build Release Binary
+        run: cargo build --release
+
+      - name: Package Release
+        shell: pwsh
+        run: |
+          $ver = "${{ github.ref_name }}"
+          $dirName = "ffmpeg-portable-gui-$ver"
+          New-Item -ItemType Directory -Path $dirName
+          Copy-Item "target/release/ffmpeg-portable-gui.exe" "$dirName/"
+          Copy-Item "README.md" "$dirName/"
+          Copy-Item "LICENSE" "$dirName/"
+          Compress-Archive -Path "$dirName/*" -DestinationPath "$dirName-windows-x64.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ffmpeg-portable-gui-*-windows-x64.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
